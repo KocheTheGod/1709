@@ -2,9 +2,11 @@ const CACHE_NAME = 'fox-forest-v1';
 const ASSETS = [
     './',
     './index.html',
-    './index.css',
+    './style.css',
     './game.js',
-    './manifest.json'
+    './manifest.json',
+    './icon-192.png',
+    './icon-512.png'
 ];
 
 self.addEventListener('install', (event) => {

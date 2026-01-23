@@ -33,6 +33,13 @@ const keys = {
 let ammo = 0;
 let playerBullets = [];
 
+// --- PERFORMANCE OPTIMIZATIONS ---
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+const dpr = window.devicePixelRatio || 1;
+const useShadows = !isMobile;
+let cachedBackground = null;
+let cachedPlatforms = null;
+
 // --- CLASSES ---
 
 class Player {
@@ -137,15 +144,17 @@ class Player {
 
         // 2. Main Face
         ctx.fillStyle = '#ff7505';
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = '#ff7505';
+        if (useShadows) {
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = '#ff7505';
+        }
         ctx.beginPath();
         ctx.moveTo(x, y + h * 0.4);
         ctx.lineTo(x + w * 0.5, y + h); // Bottom point
         ctx.lineTo(x + w, y + h * 0.4);
         ctx.closePath();
         ctx.fill();
-        ctx.shadowBlur = 0;
+        if (useShadows) ctx.shadowBlur = 0;
 
         // 3. White Cheeks
         ctx.fillStyle = '#ffffff';
@@ -293,8 +302,10 @@ class Platform {
             ctx.translate((i - (heartCount - 1) / 2) * spacing, 0);
 
             ctx.fillStyle = '#ff0000'; // Trap Red
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = '#ff0000';
+            if (useShadows) {
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#ff0000';
+            }
 
             ctx.beginPath();
             const size = 15;
@@ -311,6 +322,7 @@ class Platform {
             ctx.bezierCurveTo(-5, topY - 5, -15, topY + 5, 0, topY + 18);
             ctx.bezierCurveTo(15, topY + 5, 5, topY - 5, 0, topY + 5);
             ctx.fill();
+            if (useShadows) ctx.shadowBlur = 0;
             ctx.restore();
         }
 
@@ -421,25 +433,30 @@ class Bullet {
         const color = this.isPlayer ? '#00f260' : '#f80759';
         ctx.save();
 
-        // --- BULLET GLOW (Aura) ---
-        const auraSize = 30; // Increased for better visibility
-        const grad = ctx.createRadialGradient(
-            this.x + this.width / 2, this.y + this.height / 2, 0,
-            this.x + this.width / 2, this.y + this.height / 2, auraSize
-        );
-        grad.addColorStop(0, this.isPlayer ? 'rgba(0, 242, 96, 0.6)' : 'rgba(248, 7, 89, 0.6)');
-        grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        if (useShadows) {
+            // --- BULLET GLOW (Aura) ---
+            const auraSize = 30; // Increased for better visibility
+            const grad = ctx.createRadialGradient(
+                this.x + this.width / 2, this.y + this.height / 2, 0,
+                this.x + this.width / 2, this.y + this.height / 2, auraSize
+            );
+            grad.addColorStop(0, this.isPlayer ? 'rgba(0, 242, 96, 0.6)' : 'rgba(248, 7, 89, 0.6)');
+            grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
 
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(this.x + this.width / 2, this.y + this.height / 2, auraSize, 0, Math.PI * 2);
-        ctx.fill();
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(this.x + this.width / 2, this.y + this.height / 2, auraSize, 0, Math.PI * 2);
+            ctx.fill();
+        }
 
         // --- BULLET BODY ---
         ctx.fillStyle = color;
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = color;
+        if (useShadows) {
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = color;
+        }
         ctx.fillRect(this.x, this.y, this.width, this.height);
+        if (useShadows) ctx.shadowBlur = 0;
         ctx.restore();
     }
 }
@@ -485,11 +502,14 @@ class Particle {
         ctx.fillStyle = this.color;
 
         if (this.type === 'spirit') {
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = this.color;
+            if (useShadows) {
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = this.color;
+            }
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
             ctx.fill();
+            if (useShadows) ctx.shadowBlur = 0;
         } else if (this.type === 'drip') {
             ctx.fillRect(this.x, this.y, 1, 4);
         } else if (this.type === 'dust') {
@@ -538,23 +558,28 @@ class Firefly {
         ctx.globalAlpha = flicker;
 
 
-        // --- OUTER GLOW (Aura) ---
-        const auraSize = this.size * 10;
-        const grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, auraSize);
-        grad.addColorStop(0, 'rgba(255, 105, 180, 0.4)'); // Pink core aura
-        grad.addColorStop(1, 'rgba(255, 105, 180, 0)');   // Fade out
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, auraSize, 0, Math.PI * 2);
-        ctx.fill();
+        if (useShadows) {
+            // --- OUTER GLOW (Aura) ---
+            const auraSize = this.size * 10;
+            const grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, auraSize);
+            grad.addColorStop(0, 'rgba(255, 105, 180, 0.4)'); // Pink core aura
+            grad.addColorStop(1, 'rgba(255, 105, 180, 0)');   // Fade out
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, auraSize, 0, Math.PI * 2);
+            ctx.fill();
+        }
 
         // --- INNER BODY ---
         ctx.fillStyle = this.color;
-        ctx.shadowBlur = this.size * 6; // Intensity scaled with size
-        ctx.shadowColor = this.color;
+        if (useShadows) {
+            ctx.shadowBlur = this.size * 6; // Intensity scaled with size
+            ctx.shadowColor = this.color;
+        }
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.fill();
+        if (useShadows) ctx.shadowBlur = 0;
 
         ctx.restore();
     }
@@ -599,91 +624,87 @@ class Snow {
 }
 
 function drawBackground() {
+    if (cachedBackground) {
+        ctx.drawImage(cachedBackground, 0, 0);
+        return;
+    }
+
+    cachedBackground = document.createElement('canvas');
+    cachedBackground.width = canvas.width;
+    cachedBackground.height = canvas.height;
+    const bCtx = cachedBackground.getContext('2d');
+
     // Check if we are in the Well Level
     if (levels[currentLevel].isVertical) {
-        drawWellBackground();
+        drawWellBackground(bCtx);
+        ctx.drawImage(cachedBackground, 0, 0);
         return;
     }
 
     // SKY
-    const skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    const skyGrad = bCtx.createLinearGradient(0, 0, 0, cachedBackground.height);
     skyGrad.addColorStop(0, '#0f0c29');
     skyGrad.addColorStop(1, '#302b63');
-    ctx.fillStyle = skyGrad;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    bCtx.fillStyle = skyGrad;
+    bCtx.fillRect(0, 0, cachedBackground.width, cachedBackground.height);
 
 
     // STARS (Behind mountains)
-    ctx.fillStyle = '#ffffff';
+    bCtx.fillStyle = '#ffffff';
     stars.forEach(s => {
-        s.x += 0.1; // Animation in draw too for smoothness
-        if (s.x > canvas.width) s.x = 0;
-        ctx.globalAlpha = s.opacity * (0.5 + Math.sin(Date.now() * 0.001 + s.x) * 0.5); // Twinkle
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
-        ctx.fill();
+        bCtx.globalAlpha = s.opacity;
+        bCtx.beginPath();
+        bCtx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+        bCtx.fill();
     });
-    ctx.globalAlpha = 1.0;
+    bCtx.globalAlpha = 1.0;
 
     // MOON
-    moon.x += 0.05; // 2x slower than stars (stars drift at 0.1/0.2)
-    if (moon.x > canvas.width + 100) moon.x = -100;
-    drawHalfMoon(moon.x, moon.y);
+    drawHalfMoon(moon.x, moon.y, bCtx);
 
     // CLOUDS
-    ctx.fillStyle = '#ffffff';
+    bCtx.fillStyle = '#ffffff';
     clouds.forEach(c => {
-        c.x += 0.05; // 2x slower than stars
-        if (c.x > canvas.width + c.w) c.x = -c.w;
-        ctx.globalAlpha = c.opacity;
-        drawCloud(c.x, c.y, c.w, c.h);
+        bCtx.globalAlpha = c.opacity;
+        drawCloud(c.x, c.y, c.w, c.h, bCtx);
     });
-    ctx.globalAlpha = 1.0;
+    bCtx.globalAlpha = 1.0;
 
 
     // MOUNTAINS
-    ctx.fillStyle = COLOR_MOUNTAIN;
-    ctx.beginPath();
-    ctx.moveTo(0, canvas.height);
-    ctx.lineTo(canvas.width * 0.2, canvas.height * 0.6);
-    ctx.lineTo(canvas.width * 0.4, canvas.height * 0.8);
-    ctx.lineTo(canvas.width * 0.6, canvas.height * 0.5);
-    ctx.lineTo(canvas.width * 0.8, canvas.height * 0.7);
-    ctx.lineTo(canvas.width, canvas.height);
-    ctx.fill();
+    bCtx.fillStyle = COLOR_MOUNTAIN;
+    bCtx.beginPath();
+    bCtx.moveTo(0, cachedBackground.height);
+    bCtx.lineTo(cachedBackground.width * 0.2, cachedBackground.height * 0.6);
+    bCtx.lineTo(cachedBackground.width * 0.4, cachedBackground.height * 0.8);
+    bCtx.lineTo(cachedBackground.width * 0.6, cachedBackground.height * 0.5);
+    bCtx.lineTo(cachedBackground.width * 0.8, cachedBackground.height * 0.7);
+    bCtx.lineTo(cachedBackground.width, cachedBackground.height);
+    bCtx.fill();
 
     // Snow caps
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath();
-    ctx.moveTo(canvas.width * 0.15, canvas.height * 0.7);
-    ctx.lineTo(canvas.width * 0.2, canvas.height * 0.6);
-    ctx.lineTo(canvas.width * 0.25, canvas.height * 0.7);
-    ctx.fill();
+    bCtx.fillStyle = '#ffffff';
+    bCtx.beginPath();
+    bCtx.moveTo(cachedBackground.width * 0.15, cachedBackground.height * 0.7);
+    bCtx.lineTo(cachedBackground.width * 0.2, cachedBackground.height * 0.6);
+    bCtx.lineTo(cachedBackground.width * 0.25, cachedBackground.height * 0.7);
+    bCtx.fill();
 
-    ctx.beginPath();
-    ctx.moveTo(canvas.width * 0.55, canvas.height * 0.6);
-    ctx.lineTo(canvas.width * 0.6, canvas.height * 0.5);
-    ctx.lineTo(canvas.width * 0.65, canvas.height * 0.6);
-    ctx.fill();
+    bCtx.beginPath();
+    bCtx.moveTo(cachedBackground.width * 0.55, cachedBackground.height * 0.6);
+    bCtx.lineTo(cachedBackground.width * 0.6, cachedBackground.height * 0.5);
+    bCtx.lineTo(cachedBackground.width * 0.65, cachedBackground.height * 0.6);
+    bCtx.fill();
 
     // LAKE (Bottom of the screen)
-    const lakeHeight = canvas.height * 0.07;
-    const lakeGrad = ctx.createLinearGradient(0, canvas.height - lakeHeight, 0, canvas.height);
+    const lakeHeight = cachedBackground.height * 0.07;
+    const lakeGrad = bCtx.createLinearGradient(0, cachedBackground.height - lakeHeight, 0, cachedBackground.height);
     lakeGrad.addColorStop(0, 'rgba(0, 150, 255, 0.4)');
     lakeGrad.addColorStop(1, 'rgba(0, 50, 150, 0.8)');
-    ctx.fillStyle = lakeGrad;
-    ctx.fillRect(0, canvas.height - lakeHeight, canvas.width, lakeHeight);
+    bCtx.fillStyle = lakeGrad;
+    bCtx.fillRect(0, cachedBackground.height - lakeHeight, cachedBackground.width, lakeHeight);
 
-    // Lake Shimmer
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-    ctx.lineWidth = 1;
-    for (let i = 0; i < 5; i++) {
-        const sy = canvas.height - (Math.random() * lakeHeight);
-        ctx.beginPath();
-        ctx.moveTo(0, sy);
-        ctx.lineTo(canvas.width, sy);
-        ctx.stroke();
-    }
+    ctx.drawImage(cachedBackground, 0, 0);
 }
 
 // --- LEVEL DATA ---
@@ -793,15 +814,17 @@ function initClouds() {
 
 function initSnow() {
     snowflakes = [];
-    for (let i = 0; i < 150; i++) snowflakes.push(new Snow());
+    const count = isMobile ? 50 : 150;
+    for (let i = 0; i < count; i++) snowflakes.push(new Snow());
 }
 
 function initStars() {
     stars = [];
-    for (let i = 0; i < 200; i++) {
+    const count = isMobile ? 80 : 200;
+    for (let i = 0; i < count; i++) {
         stars.push({
             x: Math.random() * 2000,
-            y: Math.random() * 600, // Approximate height
+            y: Math.random() * 600,
             size: Math.random() * 2,
             opacity: Math.random()
         });
@@ -809,14 +832,29 @@ function initStars() {
 }
 
 function resizeCanvas() {
-    canvas.width = document.getElementById('game-container').offsetWidth;
-    canvas.height = document.getElementById('game-container').offsetHeight;
+    const container = document.getElementById('game-container');
+    const width = container.offsetWidth;
+    const height = container.offsetHeight;
+
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
+
+    ctx.scale(dpr, dpr);
+
+    cachedBackground = null;
+    cachedPlatforms = null;
+
     if (currentState === 'PLAYING') loadLevel(currentLevel); // Reload to adjust positions
 }
 
 window.addEventListener('resize', resizeCanvas);
 
 function loadLevel(levelIndex) {
+    cachedBackground = null;
+    cachedPlatforms = null;
+
     if (levelIndex >= levels.length) {
         gameWin();
         return;
@@ -863,7 +901,6 @@ function loadLevel(levelIndex) {
         }
     }
 }
-
 function checkCollision(r1, r2) {
     return (
         r1.x < r2.x + r2.width &&
@@ -1091,7 +1128,24 @@ function gameLoop() {
             if (particles[i].life <= 0) particles.splice(i, 1);
         }
 
-        platforms.forEach(p => p.draw());
+        if (cachedPlatforms) {
+            ctx.drawImage(cachedPlatforms, 0, -cameraY);
+        } else {
+            cachedPlatforms = document.createElement('canvas');
+            cachedPlatforms.width = canvas.width;
+            cachedPlatforms.height = canvas.height * (levels[currentLevel].isVertical ? 5 : 1); // Extra height for vertical levels
+            const pCtx = cachedPlatforms.getContext('2d');
+            pCtx.scale(dpr, dpr);
+
+            // Temporarily swap ctx to draw platforms to cache
+            const mainCtx = ctx;
+            ctx = pCtx;
+            platforms.forEach(p => p.draw());
+            ctx = mainCtx;
+
+            ctx.drawImage(cachedPlatforms, 0, -cameraY);
+        }
+
         enemies.forEach(e => e.draw());
         player.draw();
         ctx.restore();
@@ -1197,8 +1251,10 @@ function drawFinale() {
     ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
 
     ctx.fillStyle = '#ffffff';
-    ctx.shadowBlur = 10;
-    ctx.shadowColor = '#000000';
+    if (useShadows) {
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = '#000000';
+    }
     ctx.font = 'bold 40px Arial';
     ctx.textAlign = 'center';
 
@@ -1223,11 +1279,12 @@ function drawFinale() {
     player.draw();
 
     // Initial Bloom
+    // Initial Bloom
     if (bloom > 0) {
         ctx.fillStyle = `rgba(255,255,255,${bloom})`;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
-    ctx.shadowBlur = 0;
+    if (useShadows) ctx.shadowBlur = 0;
 }
 
 // --- INIT ---
@@ -1299,77 +1356,60 @@ if (btnShoot) addTouch(btnShoot, 'shoot');
 document.getElementById('message-overlay').addEventListener('click', hideMessage);
 document.getElementById('message-overlay').addEventListener('touchstart', hideMessage);
 
-function drawHalfMoon(x, y) {
-    ctx.save();
-    ctx.fillStyle = '#fdfdfd';
-    ctx.shadowBlur = 20;
-    ctx.shadowColor = 'rgba(255,255,255,0.5)';
-    ctx.beginPath();
-    ctx.arc(x, y, 30, Math.PI * 0.5, Math.PI * 1.5); // Crescent base
-    ctx.fill();
+function drawHalfMoon(x, y, targetCtx = ctx) {
+    targetCtx.save();
+    targetCtx.fillStyle = '#fdfdfd';
+    if (useShadows) {
+        targetCtx.shadowBlur = 20;
+        targetCtx.shadowColor = 'rgba(255,255,255,0.5)';
+    }
+    targetCtx.beginPath();
+    targetCtx.arc(x, y, 30, Math.PI * 0.5, Math.PI * 1.5); // Crescent base
+    targetCtx.fill();
 
     // Mask to make it a crescent/half-moon
-    ctx.globalCompositeOperation = 'destination-out';
-    ctx.beginPath();
-    ctx.arc(x + 10, y, 30, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
+    targetCtx.globalCompositeOperation = 'destination-out';
+    targetCtx.beginPath();
+    targetCtx.arc(x + 10, y, 30, 0, Math.PI * 2);
+    targetCtx.fill();
+    targetCtx.restore();
 }
 
-function drawWellBackground() {
+function drawWellBackground(targetCtx = ctx) {
     // Deep dark background
-    ctx.fillStyle = '#0a0a0c';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    targetCtx.fillStyle = '#0a0a0c';
+    targetCtx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Stone Walls (Left and Right)
     const wallWidth = 60;
-    ctx.fillStyle = '#1a1a1c';
+    targetCtx.fillStyle = '#1a1a1c';
 
     // Draw left wall
-    ctx.fillRect(0, 0, wallWidth, canvas.height);
+    targetCtx.fillRect(0, 0, wallWidth, canvas.height);
     // Draw right wall
-    ctx.fillRect(canvas.width - wallWidth, 0, wallWidth, canvas.height);
+    targetCtx.fillRect(canvas.width - wallWidth, 0, wallWidth, canvas.height);
 
-    // Stone Textures (Parallax)
-    ctx.fillStyle = '#252527';
-    const textureSpacing = 120;
-    const offset = cameraY % textureSpacing;
-
-    for (let y = -textureSpacing; y < canvas.height + textureSpacing; y += textureSpacing) {
-        const drawY = y - offset;
-
+    // Stone Textures (Static for cache)
+    targetCtx.fillStyle = '#252527';
+    for (let y = 0; y < canvas.height; y += 120) {
         // Left wall stones
-        ctx.fillRect(10, drawY + 10, 40, 30);
-        ctx.fillRect(0, drawY + 60, 30, 40);
+        targetCtx.fillRect(10, y + 10, 40, 30);
+        targetCtx.fillRect(0, y + 60, 30, 40);
 
         // Right wall stones
-        ctx.fillRect(canvas.width - 50, drawY + 20, 40, 30);
-        ctx.fillRect(canvas.width - 30, drawY + 70, 30, 40);
-
-        // Subtle wall edge moss/detail
-        ctx.fillStyle = '#0d2218'; // Dark moss
-        ctx.fillRect(wallWidth - 5, drawY + 40, 5, 20);
-        ctx.fillRect(canvas.width - wallWidth, drawY + 90, 5, 20);
-        ctx.fillStyle = '#252527'; // Reset to stone
+        targetCtx.fillRect(canvas.width - 50, y + 20, 40, 30);
+        targetCtx.fillRect(canvas.width - 30, y + 70, 30, 40);
     }
-
-    // Damp atmosphere/mist overlay
-    const mist = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    mist.addColorStop(0, 'rgba(0,0,0,0)');
-    mist.addColorStop(0.5, 'rgba(20,20,30,0.1)');
-    mist.addColorStop(1, 'rgba(0,0,0,0.4)');
-    ctx.fillStyle = mist;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
-function drawCloud(x, y, w, h) {
-    ctx.beginPath();
-    ctx.rect(x, y, w, h);
+function drawCloud(x, y, w, h, targetCtx = ctx) {
+    targetCtx.beginPath();
+    targetCtx.rect(x, y, w, h);
     // Draw circles for puffy look
-    ctx.arc(x, y + h, h, 0, Math.PI * 2);
-    ctx.arc(x + w * 0.5, y + h * 0.5, h * 1.2, 0, Math.PI * 2);
-    ctx.arc(x + w, y + h, h, 0, Math.PI * 2);
-    ctx.fill();
+    targetCtx.arc(x, y + h, h, 0, Math.PI * 2);
+    targetCtx.arc(x + w * 0.5, y + h * 0.5, h * 1.2, 0, Math.PI * 2);
+    targetCtx.arc(x + w, y + h, h, 0, Math.PI * 2);
+    targetCtx.fill();
 }
 
 
