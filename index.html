@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0a0a0c">
+    <link rel="manifest" href="manifest.json">
+    <title>Fox Forest Platformer</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed:', err));
+            });
+        }
+    </script>
+</head>
+
+
+<body>
+
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+
+        <div id="ui-layer">
+            <div id="score-board">
+                Level: <span id="level-display">1</span> |
+                Ammo: <span id="ammo-display">0</span>
+            </div>
+            <div id="message-overlay" class="hidden">
+                <h1 id="message-title">LEVEL TAMAMLANDI</h1>
+                <p id="message-subtitle">Devam etmek için dokun</p>
+            </div>
+        </div>
+
+        <div id="mobile-controls">
+            <div class="control-group left">
+                <button id="btn-left" class="control-btn">←</button>
+                <button id="btn-right" class="control-btn">→</button>
+            </div>
+            <div class="control-group right">
+                <button id="btn-shoot" class="control-btn shoot">🔥</button>
+                <button id="btn-jump" class="control-btn">↑</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+
+</html>
