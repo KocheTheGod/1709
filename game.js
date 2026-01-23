@@ -4,7 +4,7 @@ const ctx = canvas.getContext('2d');
 // Game Constants
 const GRAVITY = 0.0625; // Halved falling speed (Eski: 0.125)
 const FRICTION = 0.8;
-const PLAYER_SPEED = 1.625; // Yarıya düşürüldü (Eski: 3.25)
+const PLAYER_SPEED = 3.25; // 2x hızlandırıldı (Eski: 1.625)
 const JUMP_FORCE = 5; // Reduced to match lower gravity (Eski: 7)
 
 // Colors
@@ -337,7 +337,7 @@ class Enemy {
         this.height = 30;
         this.x = platform.x + Math.random() * (platform.width - this.width);
         this.y = platform.y - this.height;
-        this.speed = (0.3 + Math.random() * 0.7) * (Math.random() > 0.5 ? 1 : -1); // Hız düşürüldü
+        this.speed = (0.6 + Math.random() * 1.4) * (Math.random() > 0.5 ? 1 : -1); // 2x hızlandırıldı (Eski: 0.3 + 0.7)
         this.shootTimer = 0;
         this.shootInterval = 300; // 60 fps * 5 saniye = 300 (Daha seyrek atış)
     }
@@ -421,7 +421,7 @@ class Bullet {
         this.y = y;
         this.width = isPlayer ? 15 : 10;
         this.height = 5;
-        this.speed = dir * (isPlayer ? 3.5 : 1);
+        this.speed = dir * (isPlayer ? 7.0 : 2.0); // 2x hızlandırıldı (Eski: 3.5 : 1)
         this.isPlayer = isPlayer;
     }
 
@@ -470,13 +470,13 @@ class Particle {
             type === 'drip' ? 2 :
                 type === 'dust' ? Math.random() * 2 + 1 :
                     Math.random() * 5 + 2;
-        this.speedX = type === 'spirit' ? Math.random() * 1 - 0.5 :
-            type === 'dust' ? Math.random() * 0.5 - 0.25 :
-                Math.random() * 2 - 1;
-        this.speedY = type === 'spirit' ? Math.random() * -0.5 - 0.25 : // Speed halved (Eski: -1, -0.5)
-            type === 'drip' ? Math.random() * 2 + 1 :
-                type === 'dust' ? Math.random() * 0.2 - 0.1 :
-                    Math.random() * -2 - 1;
+        this.speedX = type === 'spirit' ? Math.random() * 2 - 1 :
+            type === 'dust' ? Math.random() * 1.0 - 0.5 :
+                Math.random() * 4 - 2;
+        this.speedY = type === 'spirit' ? Math.random() * -1.0 - 0.5 : // 2x hızlandırıldı (Eski: -0.5, -0.25)
+            type === 'drip' ? Math.random() * 4 + 2 :
+                type === 'dust' ? Math.random() * 0.4 - 0.2 :
+                    Math.random() * -4 - 2;
         this.color = color;
         this.life = 1.0;
         this.decay = type === 'spirit' ? 0.005 :
@@ -596,7 +596,7 @@ class Snow {
         this.x = Math.random() * canvas.width;
         this.y = Math.random() * -canvas.height;
         this.size = Math.random() * 3 + 1;
-        this.speed = Math.random() * 1 + 0.5;
+        this.speed = Math.random() * 2 + 1.0; // 2x hızlandırıldı (Eski: 1 + 0.5)
         this.wind = Math.random() * 0.5 - 0.25;
     }
 
