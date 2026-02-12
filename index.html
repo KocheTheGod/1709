@@ -3,54 +3,43 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#0a0a0c">
-    <link rel="manifest" href="manifest.json">
-    <title>Fox Forest Platformer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benim sevgilim olur musun? 💕</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed:', err));
-            });
-        }
-    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
 
-
 <body>
+    <!-- Floating hearts background -->
+    <div class="hearts-bg"></div>
 
-    <div id="game-container">
-        <canvas id="gameCanvas"></canvas>
+    <div class="container">
+        <h1>Benim sevgilim olur musun? 💕</h1>
 
-        <div id="ui-layer">
-            <div id="score-board">
-                Level: <span id="level-display">1</span> |
-                Ammo: <span id="ammo-display">0</span>
-            </div>
-            <div id="message-overlay" class="hidden">
-                <h1 id="message-title">LEVEL TAMAMLANDI</h1>
-                <p id="message-subtitle">Devam etmek için dokun</p>
-            </div>
+        <div class="gif-container">
+            <img id="cat-gif" src="https://media.tenor.com/EBV7OT7ACfwAAAAj/u-u-qua-qua-u-quaa.gif"
+                alt="Cute animation">
         </div>
 
-        <div id="mobile-controls">
-            <div class="control-group left">
-                <button id="btn-left" class="control-btn">←</button>
-                <button id="btn-right" class="control-btn">→</button>
-            </div>
-            <div class="control-group right">
-                <button id="btn-shoot" class="control-btn shoot">🔥</button>
-                <button id="btn-jump" class="control-btn">↑</button>
-            </div>
+        <div class="buttons">
+            <button id="yes-btn" onclick="handleYesClick()">Evet! 😍</button>
+            <button id="no-btn" onclick="handleNoClick()">Hayır</button>
         </div>
+
+        <div id="tease-toast"></div>
     </div>
 
-    <script src="game.js"></script>
+    <!-- Music toggle button -->
+    <button id="music-toggle" onclick="toggleMusic()">🔊</button>
+
+    <!-- Background music -->
+    <audio id="bg-music" loop>
+        <source src="https://www.bensound.com/bensound-music/bensound-love.mp3" type="audio/mpeg">
+    </audio>
+
+    <script src="script.js"></script>
 </body>
 
 </html>
